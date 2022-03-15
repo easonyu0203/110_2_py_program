@@ -16,17 +16,33 @@ def get_number(words: list[str], sign_index: int) -> int:
     if sign_index + 2 != len(words):
         return -1
     try:
-        number = int(words[sign_index+1])
+        number = int(words[sign_index + 1])
         if number < 0:
             return -1
     except ValueError:
         return -1
+    return number
+
+
+def split_to_worlds(line: str) -> list[str]:
+    words = [s for s in line]
+    sign_index = get_sign_index(words)
+    if sign_index == -1:
+        raise ValueError()
+    return ["".join(words[:sign_index]).strip(), words[sign_index], "".join((words[sign_index+1:])).strip()]
 
 
 class Request:
     _amount: int
     _is_valid: bool
     _name: str
+
+    log_level: bool = True
+
+    @classmethod
+    def log(cls, s: str):
+        if Request.log_level:
+            print(s)
 
     def __init__(self, line: str):
         # variables declare
@@ -37,13 +53,19 @@ class Request:
 
         # set variables
         # split line to words
-        words: list[str] = self._line.strip().split()
+        try:
+            words: list[str] = split_to_worlds(self._line)
+        except ValueError:
+            return
+        Request.log(f"words: {words}")
         # get sign index
         sign_index = get_sign_index(words)
+        Request.log(f"sign_index: {sign_index}")
         if sign_index == -1:
             return
         # get number
         number = get_number(words, sign_index)
+        Request.log(f"number: {number}")
 
 
 def main() -> None:
@@ -52,6 +74,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     # main()
-    s = "".join(["a"])
-    print(s)
-
+    Request("巧克力   +10")
